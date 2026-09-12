@@ -33,7 +33,7 @@ prompt_value = prompt_template.invoke(
 
 print("AI: ", end="")
 
-for chunk in llm.stream(prompt_value):
+for chunk in llm.stream(prompt_value.to_messages()):
     print(chunk.content, end="")
 
 print()
