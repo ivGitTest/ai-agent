@@ -5,3 +5,8 @@ llm = ChatOpenRouter(
     temperaure = 0.7
 )
 
+user_message = input("User: ")
+
+#agent_response = llm.invoke(user_message).content
+
+print(user_message)
