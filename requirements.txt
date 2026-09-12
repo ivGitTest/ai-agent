@@ -3,6 +3,7 @@ anyio==4.15.1
 certifi==2026.7.22
 charset-normalizer==3.5.1
 distro==1.9.0
+environs==15.2.0
 h11==0.16.0
 httpcore==1.0.9
 httpcore2==2.12.0
@@ -16,11 +17,13 @@ langchain-core==1.6.3
 langchain-openrouter==0.2.8
 langchain-protocol==0.0.19
 langsmith==0.12.4
+marshmallow==4.3.1
 openrouter==0.11.46
 orjson==3.12.0
 packaging==26.3
 pydantic==2.12.5
 pydantic_core==2.41.5
+python-dotenv==1.2.3
 PyYAML==6.0.3
 requests==2.34.2
 requests-toolbelt==1.0.0

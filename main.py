@@ -2,6 +2,7 @@ from langchain_openrouter import ChatOpenRouter
 from environs import Env
 from langchain_core.prompts import ChatPromptTemplate
 from datetime import date
+from langchain_core.messages import HumanMessage
 
 env = Env()
 env.read_env()
@@ -30,7 +31,13 @@ prompt_value = prompt_template.invoke(
     }
 )
 
-agent_response = llm.invoke(prompt_value).content
+print("AI: ", end="")
 
-print("AI: " + agent_response)
+for chunk in llm.stream(prompt_value):
+    print(chunk.content, end="")
+
+print()
+#agent_response = llm.invoke(prompt_value).content
+
+#print("AI: " + agent_response)
 
