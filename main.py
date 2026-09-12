@@ -5,12 +5,12 @@ from langchain_core.prompts import ChatMessagePromptTemplate
 env = Env()
 env.read_env()
 
-api_key = env.str("api-key")
+openrouter_api_key = env.str("openrouter-api-key")
 
 llm = ChatOpenRouter(
     model = "openrouter/free",
     temperature = 0.7,
-    api_key = api_key
+    api_key = openrouter_api_key
 )
 
 
