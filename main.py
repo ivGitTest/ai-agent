@@ -1,8 +1,8 @@
 from langchain_openrouter import ChatOpenRouter
-from environs import Env
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, AIMessage
 from datetime import date
-from langchain_core.messages import HumanMessage
+from environs import Env
 
 env = Env()
 env.read_env()
@@ -17,27 +17,33 @@ llm = ChatOpenRouter(
     api_key = openrouter_api_key
 )
 
-user_message = input("User: ")
+
+history = []
 
 messages = [
     ("system", "Сегодня {current_date}. Ты ии-помощник, отвечай кратко, 3-5 предложений, по делу, если не знаешь - уточни запрос, спроси человека"),
-    ("human", user_message)
+#    ("human", user_message)
+    MessagesPlaceholder("history")
 ]
 
 prompt_template = ChatPromptTemplate(messages)
-prompt_value = prompt_template.invoke(
-    {
-        "current_date": current_date
-    }
-)
+all_chunks = ""
 
-print("AI: ", end="")
+while True:
+    user_message = input("User: ")
+    if user_message == "exit": exit(0)
+    
+    history.append(HumanMessage(content=user_message))
+    prompt_value = prompt_template.invoke(
+        {
+            "current_date": current_date, 
+            "history": history
+        }
+    )
 
-for chunk in llm.stream(prompt_value.to_messages()):
-    print(chunk.content, end="")
-
-print()
-#agent_response = llm.invoke(prompt_value).content
-
-#print("AI: " + agent_response)
-
+    print("AI: ", end="")
+    for chunk in llm.stream(prompt_value.to_messages()):
+        print(chunk.content, end="")
+        all_chunks += chunk.content
+    history.append(AIMessage(content=all_chunks))    
+    print()
