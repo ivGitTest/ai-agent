@@ -16,7 +16,6 @@ current_date = date.today()
 history = []
 #-----------------------
 
-
 llm = ChatOpenRouter(
     model = "openrouter/free",
     temperature = 0.7,
@@ -83,6 +82,9 @@ def llm_structured_output():
                 'type': ['string', "null"]
             }
         }, 
+        'required':[
+            'ingredients','recipe_name', 'recipe_descr', 'error'
+        ],
         'title': 'Recipe', 
         'type': 'object'
         }
@@ -97,7 +99,7 @@ def llm_structured_output():
                         по запросу пользователя найди рецепт и определи ингридиенты. 
                         Результат выведи на русском языке.
                         Cтрого придерживайся json схемы.
-                        Если запрос не относится к приготовлению пищи - запиши ошибку в error, остальне поля отставь null"""),
+                        Если запрос не относится к приготовлению пищи - запиши в error ошибку: "Здесь обсуждаем только приготовление пищи", остальне поля отставь null"""),
         ("human", user_request)
     ]
 
@@ -105,8 +107,23 @@ def llm_structured_output():
     prepared_llm = llm.with_structured_output(recipe_json_scheme)
     ai_response = prepared_llm.invoke(messages_for_structured_output)
 
-    print("AI chief: ", end="")
-    print(json.dumps(ai_response, ensure_ascii=False, indent=4))
+    #prepared_ai_response = json.dumps(ai_response, ensure_ascii=False, indent=4)
+ 
+    #print("AI chief: ", end="")
+    #print(ai_response)
+    
+    if ai_response["error"] is None:
+        print("Рецепт: ", ai_response["recipe_name"])
+        print("Ингредиенты: ") 
+        for ingr in ai_response["ingredients"]:
+            print(" - " + ingr)
+        print("Способ приготовления: " + ai_response["recipe_descr"])
+        exit(0)
+    else:
+        print(ai_response["error"])
+        exit(-1)
+
+#    print(prepared_ai_response)
 
 #llm_dialogue()
 llm_structured_output()
