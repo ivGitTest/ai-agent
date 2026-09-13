@@ -1,0 +1,30 @@
+    {
+    "properties": {
+        "ingredients": {
+            "description": "продукт, ингридиент", 
+            "items": {}, 
+            "title": "Ingridients", 
+            "type": ["array", "null"]
+        }, 
+        "recipe_name": {
+            "description": "название рецепта", 
+            "title": "Recipe name", 
+            "type": ["string", "null"]
+        }, 
+        "recipe_descr": {
+            "description": "рецепт", 
+            "title": "Recipe descr", 
+            "type": ["string", "null"]
+        },
+        "error": {
+            "description":"ошибка",
+            "title": "Error",
+            "type": ["string", "null"]
+        }
+    }, 
+    "required":[
+        "ingredients","recipe_name", "recipe_descr", "error"
+    ],
+    "title": "Recipe", 
+    "type": "object"
+    }

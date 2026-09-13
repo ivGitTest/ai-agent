@@ -6,6 +6,7 @@ from environs import Env
 from pydantic import BaseModel, Field
 import json
 
+
 #----------------------
 env = Env()
 
@@ -21,6 +22,11 @@ llm = ChatOpenRouter(
     temperature = 0.7,
     api_key = openrouter_api_key
 )
+
+def get_schema(file_name) -> dict:
+    with open(file_name, "r", encoding="utf-8") as file:
+        recipe_json = json.load(file)
+    return recipe_json
 
 def llm_dialogue():
     messages_for_dialogue = [
@@ -53,41 +59,16 @@ def llm_dialogue():
 
 def llm_structured_output():
 
-    class KeyWords(BaseModel):
-        ingredients: list = Field(description="продукт, ингридиент")
-        recipe_name: str = Field(description="название рецепта")
-        recipe_descr: str = Field(description="рецепт")
+    file_name = "sources/recipe_schema.json"
 
-    recipe_json_scheme = {
-        'properties': {
-            'ingredients': {
-                'description': 'продукт, ингридиент', 
-                'items': {}, 
-                'title': 'Ingridients', 
-                'type': ['array', "null"]
-            }, 
-            'recipe_name': {
-                'description': 'название рецепта', 
-                'title': 'Recipe name', 
-                'type': ['string', "null"]
-            }, 
-            'recipe_descr': {
-                'description': 'рецепт', 
-                'title': 'Recipe descr', 
-                'type': ['string', "null"]
-            },
-            'error': {
-                'description':'ошибка',
-                'title': 'Error',
-                'type': ['string', "null"]
-            }
-        }, 
-        'required':[
-            'ingredients','recipe_name', 'recipe_descr', 'error'
-        ],
-        'title': 'Recipe', 
-        'type': 'object'
-        }
+    """    
+        class KeyWords(BaseModel):
+            ingredients: list = Field(description="продукт, ингридиент")
+            recipe_name: str = Field(description="название рецепта")
+            recipe_descr: str = Field(description="рецепт")
+    """
+
+    recipe_json_scheme = get_schema(file_name)
 
     print()
     print("*** Cooking hour! ***")
@@ -106,24 +87,19 @@ def llm_structured_output():
 
     prepared_llm = llm.with_structured_output(recipe_json_scheme)
     ai_response = prepared_llm.invoke(messages_for_structured_output)
-
-    #prepared_ai_response = json.dumps(ai_response, ensure_ascii=False, indent=4)
  
-    #print("AI chief: ", end="")
-    #print(ai_response)
+    print("AI chief: ")
     
     if ai_response["error"] is None:
         print("Рецепт: ", ai_response["recipe_name"])
         print("Ингредиенты: ") 
         for ingr in ai_response["ingredients"]:
-            print(" - " + ingr)
+            print(f" -  {ingr}")
         print("Способ приготовления: " + ai_response["recipe_descr"])
         exit(0)
     else:
         print(ai_response["error"])
         exit(-1)
-
-#    print(prepared_ai_response)
 
 #llm_dialogue()
 llm_structured_output()
