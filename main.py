@@ -3,8 +3,8 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, AIMessage
 from datetime import date
 from environs import Env
-from pydantic import BaseModel, Field
 import json
+import sys
 
 
 #----------------------
@@ -15,6 +15,7 @@ openrouter_api_key = env.str("openrouter-api-key")
 
 current_date = date.today()
 history = []
+MAX_HISTORY = 10
 #-----------------------
 
 llm = ChatOpenRouter(
@@ -24,8 +25,11 @@ llm = ChatOpenRouter(
 )
 
 def get_schema(file_name) -> dict:
-    with open(file_name, "r", encoding="utf-8") as file:
-        recipe_json = json.load(file)
+    try:
+        with open(file_name, "r", encoding="utf-8") as file:
+            recipe_json = json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError) as error:
+        sys.exit(f"Не удалось загрузить схему {file_name}: {error}")
     return recipe_json
 
 def llm_dialogue():
@@ -39,7 +43,7 @@ def llm_dialogue():
 
     while True:
         user_message = input("User: ")
-        if user_message == "exit": exit(0)
+        if user_message == "exit": sys.exit(0)
 
         history.append(HumanMessage(content=user_message))
         prompt_value = prompt_template.invoke(
@@ -54,19 +58,16 @@ def llm_dialogue():
         for chunk in llm.stream(prompt_value.to_messages()):
             print(chunk.content, end="")
             all_chunks += chunk.content
-        history.append(AIMessage(content=all_chunks))    
+        history.append(AIMessage(content=all_chunks))
+        if len(history) > MAX_HISTORY:
+            history[:] = history[-MAX_HISTORY:]
         print()
 
 def llm_structured_output():
 
     file_name = "sources/recipe_schema.json"
 
-    """    
-        class KeyWords(BaseModel):
-            ingredients: list = Field(description="продукт, ингридиент")
-            recipe_name: str = Field(description="название рецепта")
-            recipe_descr: str = Field(description="рецепт")
-    """
+    # Схема ограничивает список ингредиентов: не более 10 (maxItems в recipe_schema.json)
 
     recipe_json_scheme = get_schema(file_name)
 
@@ -96,10 +97,10 @@ def llm_structured_output():
         for ingr in ai_response["ingredients"]:
             print(f" -  {ingr}")
         print("Способ приготовления: " + ai_response["recipe_descr"])
-        exit(0)
+        sys.exit(0)
     else:
         print(ai_response["error"])
-        exit(-1)
+        sys.exit(1)
 
 #llm_dialogue()
 llm_structured_output()

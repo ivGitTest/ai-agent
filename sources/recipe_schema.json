@@ -3,6 +3,7 @@
         "ingredients": {
             "description": "продукт, ингридиент", 
             "items": {}, 
+            "maxItems": 10,
             "title": "Ingridients", 
             "type": ["array", "null"]
         }, 
